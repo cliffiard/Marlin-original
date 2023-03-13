@@ -56,9 +56,6 @@
   #include "../../../module/tool_change.h"
 #endif
 
-#if ENABLED (BABYSTEP_DISPLAY_TOTAL)
-  #include "../../../feature/babystep.h"
-#endif
 #define DEBUG_OUT ENABLED(DEBUG_LEVELING_FEATURE)
 #include "../../../core/debug_out.h"
 
@@ -265,15 +262,6 @@ G29_TYPE GcodeSuite::G29() {
   // Don't allow auto-leveling without homing first
   if (homing_needed_error()) G29_RETURN(false, false);
 
-  #if ENABLED(BLTOUCH)
-    if(!probe.is_exist()) {  // probe not exist
-      #if HAS_DISPLAY        // It's means that the Bltouch is not ready
-        ui.set_status("Bltouch not ready!");
-      #endif
-      SERIAL_ECHO_MSG("(Optional) Please check whether your printer has Bltouch");
-      G29_RETURN(false);
-    }
-  #endif
   // 3-point leveling gets points from the probe class
   #if ENABLED(AUTO_BED_LEVELING_3POINT)
     vector_3 points[3];
@@ -465,7 +453,9 @@ G29_TYPE GcodeSuite::G29() {
     }
 
     // Position bed horizontally and Z probe vertically.
-    #if HAS_SAFE_BED_LEVELING
+    #if    defined(SAFE_BED_LEVELING_START_X) || defined(SAFE_BED_LEVELING_START_Y) || defined(SAFE_BED_LEVELING_START_Z) \
+        || defined(SAFE_BED_LEVELING_START_I) || defined(SAFE_BED_LEVELING_START_J) || defined(SAFE_BED_LEVELING_START_K) \
+        || defined(SAFE_BED_LEVELING_START_U) || defined(SAFE_BED_LEVELING_START_V) || defined(SAFE_BED_LEVELING_START_W)
       xyze_pos_t safe_position = current_position;
       #ifdef SAFE_BED_LEVELING_START_X
         safe_position.x = SAFE_BED_LEVELING_START_X;
@@ -496,14 +486,14 @@ G29_TYPE GcodeSuite::G29() {
       #endif
 
       do_blocking_move_to(safe_position);
-    #endif // HAS_SAFE_BED_LEVELING
+    #endif
 
     // Disable auto bed leveling during G29.
     // Be formal so G29 can be done successively without G28.
     if (!no_action) set_bed_leveling_enabled(false);
 
     // Deploy certain probes before starting probing
-    #if ENABLED(BLTOUCH) || BOTH(HAS_Z_SERVO_PROBE, Z_SERVO_INTERMEDIATE_STOW)
+    #if ENABLED(BLTOUCH)
       do_z_clearance(Z_CLEARANCE_DEPLOY_PROBE);
     #elif HAS_BED_PROBE
       if (probe.deploy()) { // (returns true on deploy failure)
@@ -733,6 +723,7 @@ G29_TYPE GcodeSuite::G29() {
             abl.eqnAMatrix[abl.abl_probe_index + 0 * abl.abl_points] = abl.probePos.x;
             abl.eqnAMatrix[abl.abl_probe_index + 1 * abl.abl_points] = abl.probePos.y;
             abl.eqnAMatrix[abl.abl_probe_index + 2 * abl.abl_points] = 1;
+
             incremental_LSF(&lsf_results, abl.probePos, abl.measured_z);
 
           #elif ENABLED(AUTO_BED_LEVELING_BILINEAR)
