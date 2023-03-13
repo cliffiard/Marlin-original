@@ -161,6 +161,7 @@ void GcodeSuite::M360() {
   SERIAL_ECHOLNPGM(
     TERN_(DELTA,         "Delta")
     TERN_(IS_SCARA,      "SCARA")
+    TERN_(POLAR,         "Polar")
     TERN_(IS_CORE,       "Core")
     TERN_(MARKFORGED_XY, "MarkForgedXY")
     TERN_(MARKFORGED_YX, "MarkForgedYX")
@@ -180,7 +181,7 @@ void GcodeSuite::M360() {
   //
   config_line(F("NumExtruder"), EXTRUDERS);
   #if HAS_EXTRUDERS
-    LOOP_L_N(e, EXTRUDERS) {
+    EXTRUDER_LOOP() {
       config_line_e(e, JERK_STR, TERN(HAS_LINEAR_E_JERK, planner.max_e_jerk[E_INDEX_N(e)], TERN(HAS_CLASSIC_JERK, planner.max_jerk.e, DEFAULT_EJERK)));
       config_line_e(e, F("MaxSpeed"), planner.settings.max_feedrate_mm_s[E_AXIS_N(e)]);
       config_line_e(e, F("Acceleration"), planner.settings.max_acceleration_mm_per_s2[E_AXIS_N(e)]);

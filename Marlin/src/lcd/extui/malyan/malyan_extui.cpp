@@ -111,8 +111,8 @@ namespace ExtUI {
         case PID_STARTED:
           set_lcd_error(GET_TEXT_F(MSG_PID_AUTOTUNE));
           break;
-        case PID_BAD_EXTRUDER_NUM:
-          set_lcd_error(GET_TEXT_F(MSG_PID_BAD_EXTRUDER_NUM));
+        case PID_BAD_HEATER_ID:
+          set_lcd_error(GET_TEXT_F(MSG_PID_BAD_HEATER_ID));
           break;
         case PID_TEMP_TOO_HIGH:
           set_lcd_error(GET_TEXT_F(MSG_PID_TEMP_TOO_HIGH));
@@ -141,23 +141,29 @@ namespace ExtUI {
   void onFilamentRunout(const extruder_t extruder) {}
   void onUserConfirmRequired(const char * const) {}
   void onHomingStart() {}
-  void onHomingComplete() {}
-  void onPrintFinished() {}
+  void onHomingDone() {}
+  void onPrintDone() {}
   void onFactoryReset() {}
   void onStoreSettings(char*) {}
   void onLoadSettings(const char*) {}
   void onPostprocessSettings() {}
-  void onConfigurationStoreWritten(bool) {}
-  void onConfigurationStoreRead(bool) {}
+  void onSettingsStored(bool) {}
+  void onSettingsLoaded(bool) {}
 
   #if HAS_MESH
-    void onMeshLevelingStart() {}
+    void onLevelingStart() {}
+    void onLevelingDone() {}
     void onMeshUpdate(const int8_t xpos, const int8_t ypos, const_float_t zval) {}
     void onMeshUpdate(const int8_t xpos, const int8_t ypos, const ExtUI::probe_state_t state) {}
   #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
-    void onPowerLossResume() {}
+    void onPowerLoss() {
+      // Called when power-loss state is detected
+    }
+    void onPowerLossResume() {
+      // Called on resume from power-loss
+    }
   #endif
 
   void onSteppersDisabled() {}
